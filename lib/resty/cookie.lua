@@ -1,6 +1,7 @@
 -- Copyright (C) 2013-2016 Jiale Zhi (calio), CloudFlare Inc.
 -- See RFC6265 http://tools.ietf.org/search/rfc6265
 -- require "luacov"
+-- version 1
 
 local type          = type
 local byte          = string.byte
@@ -29,7 +30,7 @@ end
 
 local _M = new_tab(0, 2)
 
-_M._VERSION = '0.01'
+_M._VERSION = '0.1.0'
 
 
 local function get_cookie_table(text_cookie)
@@ -71,12 +72,19 @@ local function get_cookie_table(text_cookie)
                     or byte(text_cookie, j) == SPACE
                     or byte(text_cookie, j) == HTAB
             then
+                if byte(text_cookie, j) == SPACE then
+                    if j > 1 and byte(text_cookie, j - 1) ~= SEMICOLON then
+                        goto NEXT
+                    end
+                end
+
                 value = sub(text_cookie, i, j - 1)
                 cookie_table[key] = value
 
                 key, value = nil, nil
                 state = EXPECT_SP
                 i = j + 1
+                ::NEXT::
             end
         elseif state == EXPECT_SP then
             if byte(text_cookie, j) ~= SPACE

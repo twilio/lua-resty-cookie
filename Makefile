@@ -1,4 +1,4 @@
-OPENRESTY_PREFIX=/usr/local/openresty
+OPENRESTY_PREFIX=/usr/local/opt/openresty
 
 PREFIX ?=          /usr/local
 LUA_INCLUDE_DIR ?= $(PREFIX)/include
@@ -9,10 +9,17 @@ INSTALL ?= install
 
 all: ;
 
+install-deps:
+	cpan Test::Nginx
+
 install: all
 	$(INSTALL) -d $(DESTDIR)/$(LUA_LIB_DIR)/resty/
 	$(INSTALL) lib/resty/*.lua $(DESTDIR)/$(LUA_LIB_DIR)/resty/
 
 test: all
 	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r t
+
+publish: test
+	opm build
+	opm upload
 
